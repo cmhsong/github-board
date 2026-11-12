@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cmhsong Repo Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: header with home URL bar + meta; toolbar; responsive card grid auto-fitting to viewport */
+  :root {
+    --bg: #faf9f6;
+    --surface: #ffffff;
+    --surface-2: #f3f1ea;
+    --border: #e6e2d7;
+    --border-strong: #d4cfbf;
+    --fg: #1a1f2b;
+    --fg-muted: #5c6271;
+    --fg-dim: #8a8f9c;
+    --accent: #0d7c6b;
+    --accent-soft: #d5efe8;
+    --accent-fg: #065143;
+    --danger: #b8325a;
+    --warn: #a16207;
+    --fav: #c98a04;
+    --fav-soft: #fbf1d6;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 2px rgba(26,31,43,.04), 0 4px 10px rgba(26,31,43,.04);
+    --shadow-hover: 0 2px 4px rgba(26,31,43,.06), 0 10px 24px rgba(26,31,43,.08);
+    --sans: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1419;
+      --surface: #171d26;
+      --surface-2: #1f2733;
+      --border: #2a3341;
+      --border-strong: #39455a;
+      --fg: #e8ecf2;
+      --fg-muted: #a4acbd;
+      --fg-dim: #6b7489;
+      --accent: #4ec9b0;
+      --accent-soft: #15362f;
+      --accent-fg: #7fdbc4;
+      --danger: #ff6b8a;
+      --warn: #e0a53b;
+      --fav: #f2c14e;
+      --fav-soft: #3a2f12;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.25);
+      --shadow-hover: 0 2px 4px rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.4);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1419;
+    --surface: #171d26;
+    --surface-2: #1f2733;
+    --border: #2a3341;
+    --border-strong: #39455a;
+    --fg: #e8ecf2;
+    --fg-muted: #a4acbd;
+    --fg-dim: #6b7489;
+    --accent: #4ec9b0;
+    --accent-soft: #15362f;
+    --accent-fg: #7fdbc4;
+    --danger: #ff6b8a;
+    --warn: #e0a53b;
+    --fav: #f2c14e;
+    --fav-soft: #3a2f12;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.25);
+    --shadow-hover: 0 2px 4px rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.4);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    padding-block: 0 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+
+  header {
+    padding-block: 32px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .handle {
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--fg-muted);
+  }
+  .handle a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--border-strong); }
+  .handle a:hover { color: var(--accent); border-color: var(--accent); }
+  .tagline {
+    color: var(--fg-muted);
+    margin: 8px 0 0;
+    font-size: 14px;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 16px 24px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--fg-dim);
+  }
+  .meta-row b {
+    color: var(--fg);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .status-dot.pulse { animation: pulse 2s ease-in-out infinite; }
+  .status-dot.err { background: var(--danger); }
+  .status-dot.load { background: var(--warn); }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
+  }
+
+  .share-bar {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    flex-wrap: wrap;
+  }
+  .share-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    flex-shrink: 0;
+  }
+  .share-url {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--fg);
+    flex: 1 1 240px;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 2px 0;
+    scrollbar-width: thin;
+  }
+  .share-url a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px dotted var(--border-strong);
+  }
+  .share-url a:hover { color: var(--accent); border-color: var(--accent); }
+  #copy-url {
+    padding: 7px 14px;
+    font-size: 12px;
+    flex-shrink: 0;
+    font-family: var(--mono);
+  }
+  #copy-url.ok {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .search {
+    flex: 1 1 240px;
+    min-width: 0;
+    position: relative;
+  }
+  .search input {
+    width: 100%;
+    padding: 10px 14px 10px 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 14px;
+  }
+  .search input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+    border-color: var(--accent);
+  }
+  .search svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--fg-dim);
+    pointer-events: none;
+  }
+  select, button.btn {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 14px;
+    cursor: pointer;
+  }
+  select:focus, button.btn:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  button.btn:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .theme-toggle {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 9px 14px 10px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    background: none;
+    color: var(--fg-muted);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .tab:hover { color: var(--fg); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 4px; }
+  .tab[aria-selected="true"] { color: var(--accent-fg); border-bottom-color: var(--accent); font-weight: 700; }
+  .tab-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--fg-dim);
+  }
+  .tab[aria-selected="true"] .tab-count { background: var(--accent-soft); color: var(--accent-fg); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    box-shadow: var(--shadow);
+  }
+  .card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-1px);
+  }
+  .card.new {
+    border-color: var(--accent);
+    position: relative;
+  }
+  .card.new::after {
+    content: "NEW";
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    justify-content: space-between;
+    min-width: 0;
+  }
+  .repo-name {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .repo-name a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .repo-name a:hover { color: var(--accent); }
+  .repo-name a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+  .stars {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--fg-dim);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .head-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    margin: -4px -6px 0 0;
+  }
+  .fav-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--fg-dim);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color .15s ease, background .15s ease, transform .15s ease;
+  }
+  .fav-btn:hover { color: var(--fav); background: var(--fav-soft); }
+  .fav-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .fav-btn[aria-pressed="true"] { color: var(--fav); }
+  .fav-btn[aria-pressed="true"] svg { fill: currentColor; }
+  .fav-btn:active { transform: scale(.88); }
+  .card.fav { border-color: color-mix(in srgb, var(--fav) 45%, var(--border)); }
+  .tab[data-cat="fav"] .tab-star { color: var(--fav); }
+  .desc {
+    color: var(--fg-muted);
+    font-size: 13px;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.9em;
+  }
+  .desc.empty { color: var(--fg-dim); font-style: italic; }
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    font-size: 12px;
+    color: var(--fg-muted);
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    margin-top: auto;
+    padding-top: 4px;
+  }
+  .lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .lang-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--fg-dim);
+    flex-shrink: 0;
+  }
+  .card-links {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+    background: var(--surface-2);
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .pill:hover { background: var(--accent-soft); color: var(--accent-fg); border-color: var(--accent); }
+  .pill.pages { background: var(--accent-soft); color: var(--accent-fg); border-color: transparent; }
+  .pill.pages:hover { filter: brightness(1.05); }
+  .pill svg { flex-shrink: 0; }
+
+  .qr-pill { font-family: var(--sans); cursor: pointer; }
+  .qr-pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .qr-dlg {
+    width: min(92vw, 560px);
+    max-height: 94vh;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--fg);
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+  .qr-dlg::backdrop { background: rgba(10,14,20,.6); }
+  .qr-inner {
+    padding: 22px 22px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+  .qr-inner h2 { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+  .qr-desc { margin: 0; color: var(--fg-muted); font-size: 14px; }
+  .qr-box {
+    width: min(78vw, 62vh, 440px);
+    aspect-ratio: 1;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a1f2b;
+    font-size: 13px;
+  }
+  .qr-box svg { width: 100%; height: 100%; display: block; }
+  .qr-url { font-family: var(--mono); font-size: 13px; color: var(--fg-muted); overflow-wrap: anywhere; }
+  .qr-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  #qr-copy.ok { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--fg-muted);
+    font-size: 14px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+  }
+
+  footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--fg-dim);
+    font-size: 12px;
+    font-family: var(--mono);
+  }
+  footer a { color: inherit; }
+
+  @media (max-width: 500px) {
+    h1 { font-size: 22px; }
+    .card { padding: 14px; }
+    .grid { gap: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0s !important;
+      transition-duration: 0s !important;
+    }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>cmhsong Repo Board</h1>
+      <span class="handle">@<a href="https://github.com/cmhsong" target="_blank" rel="noopener">cmhsong</a></span>
+    </div>
+    <p class="tagline">cmhsong의 GitHub 저장소를 한눈에. 새 저장소는 Claude에게 "보드 업데이트"를 요청하면 자동으로 반영됩니다.</p>
+    <div class="meta-row">
+      <span><span id="status-dot" class="status-dot pulse"></span><span id="status-text">최신</span></span>
+      <span>저장소 <b id="count">—</b></span>
+      <span>데이터 기준 <b id="fetched-at">—</b></span>
+    </div>
+    <div class="share-bar" role="group" aria-label="홈 URL">
+      <span class="share-label">⌂ 홈</span>
+      <code class="share-url" id="share-url"><a href="https://cmhsong.github.io/github-board/" target="_blank" rel="noopener">https://cmhsong.github.io/github-board/</a></code>
+      <button id="copy-url" class="btn" type="button">링크 복사</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input id="q" type="search" placeholder="저장소 검색 (이름, 설명, 언어)" autocomplete="off">
+    </label>
+    <select id="sort" aria-label="정렬">
+      <option value="updated">최근 업데이트순</option>
+      <option value="created">생성 날짜순</option>
+      <option value="name">이름순</option>
+      <option value="stars">별 개수순</option>
+    </select>
+    <button id="theme" class="btn theme-toggle" type="button" aria-label="테마 전환">
+      <svg id="theme-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+      </svg>
+    </button>
+  </div>
+
+  <nav id="tabs" class="tabs" role="tablist" aria-label="분류"></nav>
+
+  <main id="grid" class="grid" aria-live="polite"></main>
+
+  <dialog id="qr-dlg" class="qr-dlg" aria-labelledby="qr-title">
+    <div class="qr-inner">
+      <h2 id="qr-title"></h2>
+      <p class="qr-desc" id="qr-desc"></p>
+      <div class="qr-box" id="qr-box" role="img" aria-label="QR 코드"></div>
+      <code class="qr-url" id="qr-url"></code>
+      <div class="qr-actions">
+        <button class="btn" id="qr-copy" type="button">링크 복사</button>
+        <button class="btn" id="qr-open" type="button">새 탭에서 열기</button>
+        <button class="btn" id="qr-close" type="button">닫기</button>
+      </div>
+    </div>
+  </dialog>
+
+  <footer>
+    데이터 출처: <a href="https://github.com/cmhsong" target="_blank" rel="noopener">github.com/cmhsong</a> · Claude 요청 시점 수집
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(() => {
+  const USER = "cmhsong";
+  const SEEN_KEY = `gh:${USER}:seen:v2`;
+  const THEME_KEY = `gh:${USER}:theme`;
+
+  // DATA_AS_OF and REPOS are refreshed whenever the user asks Claude to update the board.
+  const DATA_AS_OF = "2026-11-12T06:37:00Z";
+  const REPOS = [
+    {"id":1453536919,"name":"sports-play","html_url":"https://github.com/cmhsong/sports-play","description":"뇌성마비 학생을 위한 접근성 스포츠 놀이 (축구·배구·배드민턴·탁구)","language":"HTML","updated_at":"2026-11-12T04:43:43Z","created_at":"2026-11-11T04:54:41Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1454629235,"name":"deposit-savings-class","html_url":"https://github.com/cmhsong/deposit-savings-class","description":"예금·적금의 차이와 금리 변동을 배우는 수업용 체험 페이지","language":"HTML","updated_at":"2026-11-12T02:14:33Z","created_at":"2026-11-11T23:57:04Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1454629627,"name":"bank-practice","html_url":"https://github.com/cmhsong/bank-practice","description":"지적장애 학생을 위한 은행 앱 연습용 가상 뱅킹 웹앱 (연습은행)","language":"HTML","updated_at":"2026-11-12T02:10:45Z","created_at":"2026-11-11T23:57:38Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1453468413,"name":"rps-card-quiz","html_url":"https://github.com/cmhsong/rps-card-quiz","description":"가위바위보로 차례 정하고 카드를 뒤집어 문제 푸는 교실용 퀴즈 게임","language":"HTML","updated_at":"2026-11-11T04:48:32Z","created_at":"2026-11-11T03:18:15Z","stargazers_count":0,"has_pages":true,"homepage":"https://cmhsong.github.io/rps-card-quiz/","fork":false,"archived":false},
+    {"id":1453507576,"name":"dice-math-playground","html_url":"https://github.com/cmhsong/dice-math-playground","description":null,"language":"HTML","updated_at":"2026-11-11T04:13:14Z","created_at":"2026-11-11T04:13:02Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1450768413,"name":"hoesik-worksheet","html_url":"https://github.com/cmhsong/hoesik-worksheet","description":null,"language":"HTML","updated_at":"2026-11-09T00:03:59Z","created_at":"2026-11-09T00:03:48Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1447885692,"name":"transit-worksheet","html_url":"https://github.com/cmhsong/transit-worksheet","description":"구글맵 길찾기·실시간 도착·안내방송 듣기 웹 학습지","language":"HTML","updated_at":"2026-11-08T23:56:58Z","created_at":"2026-11-06T05:53:09Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1445189957,"name":"school-timetable","html_url":"https://github.com/cmhsong/school-timetable","description":null,"language":"HTML","updated_at":"2026-11-04T05:12:36Z","created_at":"2026-11-04T05:12:22Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1437820067,"name":"beverage-worksheet","html_url":"https://github.com/cmhsong/beverage-worksheet","description":"음료 조제 학습지 — 커피/차/에이드/스무디 조제 과정을 그림으로 안내","language":"HTML","updated_at":"2026-10-29T03:41:28Z","created_at":"2026-10-29T01:34:02Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1434007546,"name":"salary-learning","html_url":"https://github.com/cmhsong/salary-learning","description":"연봉 읽기·월급 계산 학습 웹앱","language":"HTML","updated_at":"2026-10-26T06:58:20Z","created_at":"2026-10-26T06:48:02Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1433816276,"name":"youth-labor-rights-10","html_url":"https://github.com/cmhsong/youth-labor-rights-10","description":"청소년 노동인권 10차시 웹 교육자료","language":"HTML","updated_at":"2026-10-26T02:26:32Z","created_at":"2026-10-26T02:26:22Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1427710615,"name":"lesson-template","html_url":"https://github.com/cmhsong/lesson-template","description":"수업 자료 제작 템플릿 (교사모드, OX 퀴즈, 학습지, PPT 저장)","language":"HTML","updated_at":"2026-10-21T02:43:15Z","created_at":"2026-10-21T00:38:20Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1426470260,"name":"field-practicum-prep","html_url":"https://github.com/cmhsong/field-practicum-prep","description":"고등학교 특수학급 현장실습 사전교육 10차시 (50분 수업·안전교육 자료·학습지 인쇄)","language":"HTML","updated_at":"2026-10-20T07:25:55Z","created_at":"2026-10-20T03:53:11Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1380628466,"name":"susi-2027","html_url":"https://github.com/cmhsong/susi-2027","description":"2027학년도 수시 일정·면접 지도 시간표","language":"HTML","updated_at":"2026-09-21T23:50:53Z","created_at":"2026-09-21T23:02:58Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1355477434,"name":"osaka-2027","html_url":"https://github.com/cmhsong/osaka-2027","description":"2027년 1월 오사카 4박5일 가성비 여행 플랜 (성인 4명)","language":"HTML","updated_at":"2026-09-15T03:37:14Z","created_at":"2026-09-03T03:41:07Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1363414823,"name":"osaka-2027-jan13","html_url":"https://github.com/cmhsong/osaka-2027-jan13","description":"오사카 4박 5일 여행 일정표 (2027.01.13~17, 성인 4명)","language":"HTML","updated_at":"2026-09-11T05:43:16Z","created_at":"2026-09-10T02:05:21Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1352034369,"name":"nagoya-trip","html_url":"https://github.com/cmhsong/nagoya-trip","description":"나고야 4박 5일 여행 계획 - 시라카와고/다카야마 1일 투어 포함, 대중교통 이동방법과 요금 정리","language":"JavaScript","updated_at":"2026-09-04T01:49:57Z","created_at":"2026-08-31T05:34:06Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1291674896,"name":"budget","html_url":"https://github.com/cmhsong/budget","description":null,"language":"HTML","updated_at":"2026-07-07T02:21:47Z","created_at":"2026-07-07T02:21:38Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1291671913,"name":"ITQ-Special-student","html_url":"https://github.com/cmhsong/ITQ-Special-student","description":null,"language":"HTML","updated_at":"2026-07-07T02:16:49Z","created_at":"2026-07-07T02:16:41Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1291666395,"name":"alphabet-typing","html_url":"https://github.com/cmhsong/alphabet-typing","description":null,"language":"HTML","updated_at":"2026-07-07T02:07:36Z","created_at":"2026-07-07T02:07:28Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1291662908,"name":"interview","html_url":"https://github.com/cmhsong/interview","description":null,"language":"HTML","updated_at":"2026-07-07T02:01:39Z","created_at":"2026-07-07T02:01:30Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1291655925,"name":"hanja6","html_url":"https://github.com/cmhsong/hanja6","description":"한자 6급 학습지","language":"HTML","updated_at":"2026-07-07T01:50:47Z","created_at":"2026-07-07T01:50:21Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false},
+    {"id":1291640923,"name":"barista-order","html_url":"https://github.com/cmhsong/barista-order","description":"바리스타 주문서 웹앱","language":"HTML","updated_at":"2026-07-07T01:25:54Z","created_at":"2026-07-07T01:25:29Z","stargazers_count":0,"has_pages":true,"homepage":null,"fork":false,"archived":false}
+  ];
+
+  // Hand-added non-GitHub links (Claude artifacts). update_board.py never touches this list.
+  const EXTRAS = [];
+
+  // Descriptions shown when the GitHub repo has none set.
+  const DESC_FALLBACK = {
+    "dice-math-playground": "주사위 수학 놀이터 — 주사위 계산 놀이·말판 놀이, 말판·문항 편집과 학습지 만들기",
+    "hoesik-worksheet": "회식비 정산 학습지 — 서울 식당 100곳 메뉴판에서 인원수만큼 메뉴를 고르고 1/N 정산을 계산 (A4 인쇄)",
+  };
+  REPOS.forEach(r => { if (!r.description && DESC_FALLBACK[r.name]) r.description = DESC_FALLBACK[r.name]; });
+  const ALL = REPOS.concat(EXTRAS);
+
+  // Category tabs. CATEGORY_OF pins known repos (by name, or id for artifacts);
+  // repos added later fall back to CATEGORY_RULES on name + description, else "etc".
+  const CATEGORIES = [
+    { key: "all", label: "전체" },
+    { key: "fav", label: '<span class="tab-star" aria-hidden="true">★</span> 즐겨찾기' },
+    { key: "class", label: "수업·학습지" },
+    { key: "work", label: "학교 업무" },
+    { key: "travel", label: "여행" },
+    { key: "etc", label: "기타" },
+  ];
+  const CATEGORY_OF = {
+    "transit-worksheet": "class", "beverage-worksheet": "class", "salary-learning": "class",
+    "youth-labor-rights-10": "class", "field-practicum-prep": "class", "hanja6": "class",
+    "alphabet-typing": "class", "barista-order": "class", "ITQ-Special-student": "class",
+    "interview": "class", "hoesik-worksheet": "class",
+    "dice-math-playground": "class", "rps-card-quiz": "class", "sports-play": "class",
+    "deposit-savings-class": "class", "bank-practice": "class",
+    "github-board": "etc",
+    "school-timetable": "work", "susi-2027": "work", "lesson-template": "work", "budget": "work",
+    "osaka-2027": "travel", "osaka-2027-jan13": "travel", "nagoya-trip": "travel",
+  };
+  const CATEGORY_RULES = [
+    ["travel", /여행|trip|travel|tour|osaka|nagoya|tokyo|kyoto|fukuoka|오사카|나고야|도쿄|교토|후쿠오카|일본/i],
+    ["class", /학습|수업|worksheet|learning|교육|차시|typing|타자|quiz|퀴즈|hanja|한자|itq|연습|훈련|math|수학|dice|주사위|game|게임|놀이|play|sports|스포츠|체육/i],
+    ["work", /시간표|timetable|수시|입시|일정|schedule|budget|예산|template|템플릿|업무|회의/i],
+  ];
+  function classify(r) {
+    const pinned = CATEGORY_OF[r.kind === "artifact" ? r.id : r.name];
+    if (pinned) return pinned;
+    const text = `${r.name} ${r.description || ""}`;
+    for (const [key, re] of CATEGORY_RULES) if (re.test(text)) return key;
+    return "etc";
+  }
+  ALL.forEach(r => { r.category = classify(r); });
+
+  const TAB_KEY = `gh:${USER}:tab`;
+  let activeCat = "all";
+  try { activeCat = localStorage.getItem(TAB_KEY) || "all"; } catch {}
+
+  // Favorites are per-viewer (this browser only), pinned to the top of every list.
+  const FAV_KEY = `gh:${USER}:fav`;
+  let favs = new Set();
+  try { favs = new Set(JSON.parse(localStorage.getItem(FAV_KEY) || "[]")); } catch {}
+  const isFav = r => favs.has(String(r.id));
+  function toggleFav(id) {
+    favs.has(id) ? favs.delete(id) : favs.add(id);
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...favs])); } catch {}
+  }
+
+  function renderTabs() {
+    const tabsEl = document.getElementById("tabs");
+    const counts = { all: ALL.length };
+    ALL.forEach(r => { counts[r.category] = (counts[r.category] || 0) + 1; });
+    counts.fav = ALL.filter(isFav).length;
+    const shown = CATEGORIES.filter(c => c.key === "all" || counts[c.key]);
+    if (!shown.some(c => c.key === activeCat)) activeCat = "all";
+    tabsEl.innerHTML = shown.map(c => `
+      <button class="tab" type="button" role="tab" data-cat="${c.key}"
+        aria-selected="${c.key === activeCat}" tabindex="${c.key === activeCat ? 0 : -1}">
+        ${c.label}<span class="tab-count">${counts[c.key] || 0}</span>
+      </button>`).join("");
+  }
+  function selectTab(key, focus) {
+    activeCat = key;
+    try { localStorage.setItem(TAB_KEY, key); } catch {}
+    renderTabs();
+    render();
+    if (focus) document.querySelector(`.tab[data-cat="${key}"]`)?.focus();
+  }
+
+  const LANG_COLORS = {
+    "Claude Artifact": "#d97757",
+    "HTML": "#e34c26", "JavaScript": "#f1e05a", "TypeScript": "#3178c6",
+    "CSS": "#563d7c", "Python": "#3572A5", "Java": "#b07219",
+    "C++": "#f34b7d", "C": "#555555", "C#": "#178600",
+    "Go": "#00ADD8", "Rust": "#dea584", "Ruby": "#701516",
+    "PHP": "#4F5D95", "Swift": "#F05138", "Kotlin": "#A97BFF",
+    "Shell": "#89e051", "Vue": "#41b883", "Dart": "#00B4AB",
+    "Jupyter Notebook": "#DA5B0B", "R": "#198CE7", "Markdown": "#083fa1"
+  };
+
+  const el = {
+    grid: document.getElementById("grid"),
+    count: document.getElementById("count"),
+    fetchedAt: document.getElementById("fetched-at"),
+    status: document.getElementById("status-text"),
+    statusDot: document.getElementById("status-dot"),
+    q: document.getElementById("q"),
+    sort: document.getElementById("sort"),
+    theme: document.getElementById("theme"),
+    themeIcon: document.getElementById("theme-icon"),
+  };
+
+  let seen = loadSeen();
+
+  function loadSeen() {
+    try {
+      const s = localStorage.getItem(SEEN_KEY);
+      return s ? new Set(JSON.parse(s)) : null;
+    } catch { return null; }
+  }
+  function saveSeen(ids) {
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify([...ids])); } catch {}
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    const diff = (Date.now() - d.getTime()) / 1000;
+    if (diff < 60) return "방금 전";
+    if (diff < 3600) return `${Math.floor(diff/60)}분 전`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}시간 전`;
+    if (diff < 86400*7) return `${Math.floor(diff/86400)}일 전`;
+    if (diff < 86400*30) return `${Math.floor(diff/86400/7)}주 전`;
+    if (diff < 86400*365) return `${Math.floor(diff/86400/30)}개월 전`;
+    return `${Math.floor(diff/86400/365)}년 전`;
+  }
+  function fmtDate(d) {
+    const pad = n => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+
+  function compareRepos(mode) {
+    return (a, b) => {
+      if (mode === "name") return a.name.localeCompare(b.name);
+      if (mode === "stars") return (b.stargazers_count - a.stargazers_count) || a.name.localeCompare(b.name);
+      if (mode === "created") return new Date(b.created_at) - new Date(a.created_at);
+      return new Date(b.updated_at) - new Date(a.updated_at);
+    };
+  }
+
+  function matches(repo, q) {
+    if (!q) return true;
+    const hay = [repo.name, repo.description, repo.language].filter(Boolean).join(" ").toLowerCase();
+    return hay.includes(q);
+  }
+
+  function renderCard(r) {
+    const pagesUrl = r.has_pages ? `https://${USER}.github.io/${r.name}/` : null;
+    const homepage = r.homepage && /^https?:\/\//.test(r.homepage) ? r.homepage : null;
+    const live = pagesUrl || homepage;
+    const liveLabel = pagesUrl ? "Pages" : "Site";
+    const isArtifact = r.kind === "artifact";
+    const langColor = r.language ? (LANG_COLORS[r.language] || "#8a8f9c") : "#8a8f9c";
+    const isNew = seen && !seen.has(r.id);
+    const updatedTitle = fmtDate(new Date(r.updated_at));
+
+    const fav = isFav(r);
+
+    return `
+      <article class="card${isNew ? ' new' : ''}${fav ? ' fav' : ''}" data-id="${r.id}">
+        <div class="card-head">
+          <h2 class="repo-name" title="${escapeHtml(r.name)}">
+            <a href="${escapeHtml(r.html_url)}" target="_blank" rel="noopener">${escapeHtml(r.name)}</a>
+          </h2>
+          <span class="head-right">
+            ${r.stargazers_count > 0 ? `<span class="stars" title="GitHub 별 ${r.stargazers_count}개">★ ${r.stargazers_count}</span>` : ""}
+            <button class="fav-btn" type="button" data-fav="${escapeHtml(String(r.id))}" aria-pressed="${fav}"
+              aria-label="${escapeHtml(r.name)} 즐겨찾기${fav ? ' 해제' : ''}" title="${fav ? '즐겨찾기 해제' : '즐겨찾기 (맨 위에 고정)'}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.84 5.75 6.35.92-4.6 4.48 1.09 6.32L12 17.29l-5.68 2.98 1.09-6.32-4.6-4.48 6.35-.92z"/></svg>
+            </button>
+          </span>
+        </div>
+        <p class="desc${r.description ? '' : ' empty'}">${escapeHtml(r.description || "설명 없음")}</p>
+        <div class="card-meta">
+          ${r.language ? `<span class="lang"><span class="lang-dot" style="background:${langColor}"></span>${escapeHtml(r.language)}</span>` : ""}
+          <span title="${updatedTitle}">⟳ ${timeAgo(r.updated_at)}</span>
+          ${r.fork ? `<span title="포크된 저장소">⑂ fork</span>` : ""}
+          ${r.archived ? `<span title="아카이브됨">▣ archived</span>` : ""}
+        </div>
+        <div class="card-links">
+          ${isArtifact ? `<a class="pill pages" href="${escapeHtml(r.html_url)}" target="_blank" rel="noopener">◆ Artifact 열기</a>` : ""}
+          <a class="pill"${isArtifact ? " hidden" : ""} href="${escapeHtml(r.html_url)}" target="_blank" rel="noopener">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.69-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.68 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18.92-.26 1.9-.39 2.88-.39.98 0 1.96.13 2.88.39 2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14 0 1.55-.01 2.8-.01 3.18 0 .31.21.67.8.56C20.21 21.38 23.5 17.07 23.5 12 23.5 5.73 18.27.5 12 .5z"/></svg>
+            Repo
+          </a>
+          ${live ? `<a class="pill pages" href="${escapeHtml(live)}" target="_blank" rel="noopener">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>
+            ${liveLabel}
+          </a>` : ""}
+          ${live ? `<button class="pill qr-pill" type="button" data-qr="${escapeHtml(live)}" data-name="${escapeHtml(r.name)}" data-desc="${escapeHtml(r.description || "")}" aria-label="${escapeHtml(r.name)} QR 코드 보기">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>
+            QR
+          </button>` : ""}
+        </div>
+      </article>`;
+  }
+
+  function render() {
+    const q = el.q.value.trim().toLowerCase();
+    const sort = el.sort.value;
+    const filtered = ALL
+      .filter(r => activeCat === "all" || (activeCat === "fav" ? isFav(r) : r.category === activeCat))
+      .filter(r => matches(r, q))
+      .sort(compareRepos(sort))
+      .sort((a, b) => isFav(b) - isFav(a));
+    if (filtered.length === 0) {
+      el.grid.innerHTML = `<div class="empty-state">${q ? `"${escapeHtml(q)}"에 해당하는 저장소가 없습니다.` : "저장소가 없습니다."}</div>`;
+      return;
+    }
+    el.grid.innerHTML = filtered.map(renderCard).join("");
+  }
+
+  function init() {
+    el.count.textContent = ALL.length;
+    el.fetchedAt.textContent = fmtDate(new Date(DATA_AS_OF));
+    const currentIds = new Set(ALL.map(r => r.id));
+    if (seen) {
+      const freshlyNew = ALL.filter(r => !seen.has(r.id)).length;
+      el.status.textContent = freshlyNew > 0 ? `새 저장소 ${freshlyNew}개` : "최신";
+    } else {
+      el.status.textContent = "최신";
+    }
+    seen = currentIds;
+    saveSeen(currentIds);
+    render();
+  }
+
+  function applyTheme(mode) {
+    if (mode === "light" || mode === "dark") document.documentElement.setAttribute("data-theme", mode);
+    else document.documentElement.removeAttribute("data-theme");
+    const isDark = mode === "dark" || (!mode && matchMedia("(prefers-color-scheme: dark)").matches);
+    el.themeIcon.innerHTML = isDark
+      ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+      : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
+  }
+  function initTheme() {
+    let saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch {}
+    applyTheme(saved);
+  }
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute("data-theme");
+    const isDark = current === "dark" || (!current && matchMedia("(prefers-color-scheme: dark)").matches);
+    const next = isDark ? "light" : "dark";
+    try { localStorage.setItem(THEME_KEY, next); } catch {}
+    applyTheme(next);
+  }
+
+  initTheme();
+  renderTabs();
+  const tabsEl = document.getElementById("tabs");
+  tabsEl.addEventListener("click", e => {
+    const btn = e.target.closest(".tab");
+    if (btn) selectTab(btn.dataset.cat);
+  });
+  tabsEl.addEventListener("keydown", e => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const keys = [...tabsEl.querySelectorAll(".tab")].map(b => b.dataset.cat);
+    const i = keys.indexOf(activeCat);
+    const next = keys[(i + (e.key === "ArrowRight" ? 1 : -1) + keys.length) % keys.length];
+    e.preventDefault();
+    selectTab(next, true);
+  });
+  el.grid.addEventListener("click", e => {
+    const qrBtn = e.target.closest(".qr-pill");
+    if (qrBtn) { openQr(qrBtn.dataset.qr, qrBtn.dataset.name, qrBtn.dataset.desc); return; }
+    const btn = e.target.closest(".fav-btn");
+    if (!btn) return;
+    const id = btn.dataset.fav;
+    toggleFav(id);
+    renderTabs();
+    render();
+    el.grid.querySelector(`.fav-btn[data-fav="${CSS.escape(id)}"]`)?.focus();
+  });
+  // QR dialog: big, high-contrast code meant for projecting to a class.
+  const qr = {
+    dlg: document.getElementById("qr-dlg"),
+    title: document.getElementById("qr-title"),
+    desc: document.getElementById("qr-desc"),
+    box: document.getElementById("qr-box"),
+    url: document.getElementById("qr-url"),
+    copy: document.getElementById("qr-copy"),
+  };
+  function qrSvg(text) {
+    const code = qrcode(0, "M");
+    code.addData(text);
+    code.make();
+    const n = code.getModuleCount(), q = 2;
+    let d = "";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (code.isDark(r, c)) d += `M${c + q} ${r + q}h1v1h-1z`;
+    return `<svg viewBox="0 0 ${n + q * 2} ${n + q * 2}" shape-rendering="crispEdges" aria-hidden="true"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+  }
+  function openQr(url, name, desc) {
+    qr.title.textContent = name;
+    qr.desc.textContent = desc || "";
+    qr.desc.hidden = !desc;
+    qr.url.textContent = url;
+    qr.box.setAttribute("aria-label", `${name} QR 코드: ${url}`);
+    try { qr.box.innerHTML = qrSvg(url); }
+    catch { qr.box.textContent = "QR 코드를 만들지 못했어요. 아래 링크를 사용하세요."; }
+    qr.copy.textContent = "링크 복사";
+    qr.copy.classList.remove("ok");
+    qr.dlg.showModal();
+  }
+  document.getElementById("qr-close").addEventListener("click", () => qr.dlg.close());
+  document.getElementById("qr-open").addEventListener("click", () => window.open(qr.url.textContent, "_blank", "noopener"));
+  qr.dlg.addEventListener("click", e => { if (e.target === qr.dlg) qr.dlg.close(); });
+  qr.copy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(qr.url.textContent);
+      qr.copy.textContent = "복사됨";
+      qr.copy.classList.add("ok");
+    } catch {
+      const r = document.createRange();
+      r.selectNodeContents(qr.url);
+      const s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(r);
+      qr.copy.textContent = "직접 복사하세요";
+    }
+  });
+
+  el.q.addEventListener("input", render);
+  el.sort.addEventListener("change", render);
+  el.theme.addEventListener("click", toggleTheme);
+
+  const copyBtn = document.getElementById("copy-url");
+  const shareUrlEl = document.getElementById("share-url");
+  copyBtn?.addEventListener("click", async () => {
+    const url = shareUrlEl.textContent.trim();
+    const prev = copyBtn.textContent;
+    try {
+      await navigator.clipboard.writeText(url);
+      copyBtn.textContent = "복사됨";
+      copyBtn.classList.add("ok");
+      setTimeout(() => {
+        copyBtn.textContent = prev;
+        copyBtn.classList.remove("ok");
+      }, 1500);
+    } catch {
+      const r = document.createRange();
+      r.selectNodeContents(shareUrlEl);
+      const s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(r);
+      copyBtn.textContent = "직접 복사하세요";
+      setTimeout(() => { copyBtn.textContent = prev; }, 2000);
+    }
+  });
+
+  init();
+})();
+</script>
